@@ -23,4 +23,8 @@ For an example, see `test/test.c`.
  - Invoke `make install`
 
 You will now be able to link with cgame globally (`-lcgame`) and use it (`#include <libcgame.h>`) in your C projects.
- 
+
+## A Warning
+
+If you're not a lazy ass like me you're FAR better off using SDL2 directly. I mainly just made this to
+simplify my own smaller 2D projects.
