@@ -2,6 +2,20 @@
 #include "cgmem.h"
 #include <malloc.h>
 
+// Internal resize function
+int
+cg_mem_list_resize (cg_mem_list* list, int newcap)
+{
+	void* items = realloc (list->items, newcap * sizeof (cg_mem_item*));
+
+	if (items == NULL) return 0;
+	
+	list->capacity = newcap;
+	list->items = items;
+
+	return 1;
+}
+
 void
 cg_new_mem_list (cg_mem_list* list, int itemsize)
 {
@@ -17,9 +31,13 @@ cg_mem_list_add (cg_mem_list* list)
 {
 	cg_mem_item* mitem = malloc (list->itemsize);
 
+	if (mitem == NULL) return NULL;
+
 	if (list->capacity - list->num < 1) {
-		list->capacity++;
-		list->items = realloc (list->items, list->capacity * sizeof (cg_mem_item*));
+		if (!cg_mem_list_resize (list, list->capacity + 1)) {
+			free (mitem);
+			return NULL;
+		}
 	}
 
 	mitem->cg_index = list->num;
@@ -30,7 +48,7 @@ cg_mem_list_add (cg_mem_list* list)
 }
 
 
-void
+int
 cg_mem_list_remove (cg_mem_list *list, cg_mem_item *item)
 {
 	list->num--;
@@ -43,11 +61,13 @@ cg_mem_list_remove (cg_mem_list *list, cg_mem_item *item)
 	}
 
 	if (list->capacity - list->num > CG_MEM_EXTRAS) {
-		list->capacity = list->num;
-		list->items = realloc (list->items, list->capacity * sizeof (cg_mem_item*));
+		if (!cg_mem_list_resize (list, list->num)) {
+			return 0;
+		}
 	}
 
 	free (item);
+	return 1;
 }
 
 

@@ -5,6 +5,11 @@
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
 
+// cg_initialized tracks if the cg_ context has been initialized and NOT UNINITIALIZED WITH cg_quit
+int cg_initialized = 0;
+// cg_initialized_once tracks if the cg_ context has been initialized EVER and is NOT undone by cg_quit
+int cg_initialized_once = 0;
+
 cg_mem_list cg_windows;
 
 
@@ -25,18 +30,32 @@ struct cg_sprite {
 };
 
 
+void
+cg_quit_atexit ()
+{
+	cg_quit ();
+}
+
+
 int
 cg_init ()
 {
+	if (cg_initialized) return 0;
+
+	if (!cg_initialized_once) atexit (cg_quit_atexit);
+
 	if (SDL_Init (SDL_INIT_EVERYTHING) != 0)
-		return -1;
+		return 0;
 
 	if (!(IMG_Init (CG_IMG_FORMATS) & CG_IMG_FORMATS))
-		return -2;
+		return 0;
 
 	cg_new_mem_list(&cg_windows, sizeof(cg_window));
 
-	return 0;
+	cg_initialized = 1;
+	cg_initialized_once = 1;
+
+	return 1;
 }
 
 
@@ -52,7 +71,7 @@ cg_new_window (const char* title, int width, int height)
 	window->window = SDL_CreateWindow (title, WP, WP, width, height, 0);
 
 	if (window->window == NULL) {
-		free (window);
+		cg_mem_list_remove (&cg_windows, (cg_mem_item*) window);
 		return NULL;
 	}
 
@@ -62,10 +81,9 @@ cg_new_window (const char* title, int width, int height)
 
 	if (window->renderer == NULL) {
 		SDL_DestroyWindow (window->window);
-		free (window);
+		cg_mem_list_remove (&cg_windows, (cg_mem_item*) window);
 		return NULL;
 	}
-
 
 	return window;
 }
@@ -80,10 +98,16 @@ cg_new_sprite (cg_window* window, const char* path)
 
 	cg_sprite* spr = (cg_sprite*) cg_mem_list_add (&window->sprites);
 
+	if (spr == NULL) return NULL;
+
 	spr->texture = SDL_CreateTextureFromSurface (window->renderer, loaded);
 	spr->window = window;
 
-	SDL_QueryTexture (spr->texture, NULL, NULL, &spr->rect.w, &spr->rect.h);
+	if (spr->texture == NULL || SDL_QueryTexture (spr->texture, NULL, NULL, &spr->rect.w, &spr->rect.h) != 0) {
+		if (spr->texture != NULL) SDL_DestroyTexture (spr->texture);
+		cg_mem_list_remove (&window->sprites, (cg_mem_item*) spr);
+		return NULL;
+	}
 
 	spr->rect.w *= CG_SCALE;
 	spr->rect.h *= CG_SCALE;
@@ -99,6 +123,8 @@ cg_new_instance (cg_sprite* sprite)
 {
 	cg_instance* choice = (cg_instance*) cg_mem_list_add (&sprite->window->instances);
 
+	if (choice == NULL) return NULL;
+
 	choice->x = 0;
 	choice->y = 0;
 	choice->sprite = sprite;
@@ -107,32 +133,34 @@ cg_new_instance (cg_sprite* sprite)
 }
 
 
-void
+int
 cg_destroy_sprite (cg_sprite* sprite)
 {
 	SDL_DestroyTexture(sprite->texture);
-	cg_mem_list_remove (&sprite->window->sprites, (cg_mem_item*) sprite);
+	return cg_mem_list_remove (&sprite->window->sprites, (cg_mem_item*) sprite);
 }
 
 
-void
+int
 cg_destroy_instance (cg_instance* instance)
 {
-	cg_mem_list_remove (&instance->sprite->window->instances, (cg_mem_item*) instance);
+	return cg_mem_list_remove (&instance->sprite->window->instances, (cg_mem_item*) instance);
 }
 
 
-void
+int 
 cg_destroy_window (cg_window* window)
 {
-	for (int i = 0; i < window->instances.num; i++) {
-		cg_destroy_instance ((cg_instance*) window->instances.items[i]);
+	while (window->instances.num > 0) {
+		if (!cg_destroy_instance ((cg_instance*) window->instances.items[0]))
+			return 0;
 	}
 
 	cg_destroy_mem_list (&window->instances);
 
-	for (int i = 0; i < window->sprites.num; i++) {
-		cg_destroy_sprite ((cg_sprite*) window->sprites.items[i]);
+	while (window->sprites.num > 0) {
+		if (!cg_destroy_sprite ((cg_sprite*) window->sprites.items[0]))
+			return 0;
 	}
 
 	cg_destroy_mem_list (&window->sprites);
@@ -140,20 +168,26 @@ cg_destroy_window (cg_window* window)
 	SDL_DestroyRenderer (window->renderer);
 	SDL_DestroyWindow (window->window);
 
-	cg_mem_list_remove (&cg_windows, (cg_mem_item*) window);
+	return cg_mem_list_remove (&cg_windows, (cg_mem_item*) window);
 }
 
 
-void
+int
 cg_quit ()
 {
-	for (int i = 0; i < cg_windows.num; i++) {
-		cg_destroy_window ((cg_window*) cg_windows.items[i]);
+	if (!cg_initialized) return 1;
+
+	while (cg_windows.num > 0) {
+		if (!cg_destroy_window ((cg_window*) cg_windows.items[0])) return 0;
 	}
 
 	cg_destroy_mem_list (&cg_windows);
 
 	SDL_Quit ();
+
+	cg_initialized = 0;
+
+	return 1;
 }
 
 
@@ -167,7 +201,7 @@ cg_update (cg_window* window)
 	}
 
 
-	SDL_RenderClear (window->renderer);
+	if (SDL_RenderClear (window->renderer) != 0) return 0;
 
 	for (int i = 0; i < window->instances.num; i++) {
 		cg_instance* instance = (cg_instance*) window->instances.items[i];
@@ -175,8 +209,8 @@ cg_update (cg_window* window)
 		instance->sprite->rect.x = instance->x * CG_SCALE;
 		instance->sprite->rect.y = instance->y * CG_SCALE;
 
-		SDL_RenderCopy (window->renderer, instance->sprite->texture,
-			NULL, &instance->sprite->rect);
+		if (SDL_RenderCopy (window->renderer, instance->sprite->texture,
+			NULL, &instance->sprite->rect) != 0) return 0;
 	}
 
 	SDL_RenderPresent (window->renderer);

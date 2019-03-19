@@ -280,47 +280,51 @@ typedef struct cg_instance {
 } cg_instance;
 
 // Must be called before any cg_ operations - initializes the library.
+// Returns 0 upon failure, otherwise 1.
 int
 cg_init ();
 
 // Should be called at the end of the program to clean up. This will automatically
 // destroy all items initialized using cg_new_<> functions that have not yet been destroyed
-// properly.
-void
+// properly. Returns 0 upon failure, otherwise 1.
+// This function will automatically be called at exit if not already called.
+int
 cg_quit ();
 
-// Creates a new window.
+// Creates a new window. Returns NULL upon failure.
 cg_window*
 cg_new_window (const char* title, int width, int height);
 
-// Creates a new sprite.
+// Creates a new sprite. Returns NULL upon failure.
 cg_sprite*
 cg_new_sprite (cg_window* window, const char* path);
 
-// Creates a new instance that will be drawn onscreen.
+// Creates a new instance that will be drawn onscreen. Returns NULL upon failure.
 cg_instance*
 cg_new_instance (cg_sprite* sprite);
 
-// Destroys the given sprite.
-void
+// Destroys the given sprite. Returns 0 upon failure.
+int
 cg_destroy_sprite (cg_sprite* sprite);
 
-// Destroys an instance, causing it to no longer be drawn onscreen.
-void
+// Destroys an instance, causing it to no longer be drawn onscreen. Returns 0 upon failure.
+int
 cg_destroy_instance (cg_instance* instance);
 
 // Destroys a window and all its associated objects (sprites, instances, etc.)
-void
+// Returns 0 upon failure.
+int
 cg_destroy_window (cg_window* window);
 
 // Processes any events and then renders the frame, returning '1' unless the
-// window has been requested to close.
+// window has been requested to close, or a crash has occured.
 int
 cg_update (cg_window* window);
 
 // Check if the given key is pressed.
 // Pass NULL for window to get the global (non-focus-dependent) key state.
 // Note that non-focus-dependent key state is unreliable.
+// Returns 0 upon failure, as well as for unpressed keys.
 int
 cg_get_key (cg_window* window, cg_key scancode);
 

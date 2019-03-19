@@ -22,7 +22,7 @@
 				},
 				{
 					"name": "run test",
-					"shell_cmd": "cd ..; valgrind --leak-check=full build/test/test"
+					"shell_cmd": "cd ..; valgrind --leak-check=full --suppressions=valgrind.supp build/test/test"
 				},
 				{
 					"name": "refresh",

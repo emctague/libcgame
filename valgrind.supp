@@ -1,0 +1,66 @@
+{
+   ignore_sdl_errors
+   Memcheck:Leak
+   ...
+   obj:*/libSDL2-2.0.so.*
+}
+{
+   ignore_sdl_errors
+   Memcheck:Addr8
+   ...
+   obj:*/libSDL2-2.0.so.*
+}
+{
+   ignore_sdl_errors
+   Memcheck:Addr4
+   ...
+   obj:*/libSDL2-2.0.so.*
+}
+{
+   ignore_sdl_errors
+   Memcheck:Addr2
+   ...
+   obj:*/libSDL2-2.0.so.*
+}
+{
+   ignore_sdl_errors
+   Memcheck:Addr1
+   ...
+   obj:*/libSDL2-2.0.so.*
+}
+{
+   ignore_sdl_errors
+   fun:memmove
+   ...
+   obj:*/libSDL2-2.0.so.*
+}
+{
+   ignore_sdl_errors
+   Memcheck:Addr8
+   ...
+   obj:*/i965_dri*
+}
+{
+   ignore_sdl_errors
+   Memcheck:Addr4
+   ...
+   obj:*/i965_dri*
+}
+{
+   ignore_sdl_errors
+   Memcheck:Addr2
+   ...
+   obj:*/i965_dri*
+}
+{
+   ignore_sdl_errors
+   Memcheck:Addr1
+   ...
+   obj:*/i965_dri*
+}
+{
+   ignore_sdl_errors
+   fun:memmove
+   ...
+   obj:*/i965_dri*
+}

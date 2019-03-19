@@ -34,12 +34,14 @@ cg_new_mem_list (cg_mem_list* list, int itemsize);
 
 
 // Adds the given item pointer to a cg_mem_list and returns its assigned index
+// Returns NULL in the event of an error.
 cg_mem_item*
 cg_mem_list_add (cg_mem_list* list);
 
 
 // Removes the given item index from the cg_mem_list AND FREES IT.
-void
+// Returns 0 in the event of an error.
+int
 cg_mem_list_remove (cg_mem_list* list, cg_mem_item* item);
 
 
