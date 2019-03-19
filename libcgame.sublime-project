@@ -22,7 +22,7 @@
 				},
 				{
 					"name": "run test",
-					"shell_cmd": "cd ..; build/src/test/test"
+					"shell_cmd": "cd ..; build/test/test"
 				},
 				{
 					"name": "refresh",

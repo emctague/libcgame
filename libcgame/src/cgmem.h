@@ -1,14 +1,16 @@
 // libcgame Internal memory management system
 #pragma once
+#define CG_INTERNAL
+#include <libcgame.h>
+
+#define CG_ITEMIZABLE int cg_index;
+
 
 // CG_MEM_EXTRAS is the number of acceptable unused slots in a list
 // before extras are freed.
 #ifndef CG_MEM_EXTRAS
 #define CG_MEM_EXTRAS 10
 #endif
-
-
-#define CG_ITEMIZABLE int cg_index;
 
 
 // A cg_mem_item is an item that keeps track of its index in a cg_mem_list.

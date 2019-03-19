@@ -1,5 +1,6 @@
-#include "../libcgame/libcgame.h"
+#include <libcgame.h>
 #include <assert.h>
+
 
 int
 main (int argc, char** argv)
@@ -8,7 +9,7 @@ main (int argc, char** argv)
 
 	cg_window* window = cg_new_window ("libcgame test", 1024, 768);
 
-	cg_sprite* sprite = cg_new_sprite (window, "src/test/sprite.png");
+	cg_sprite* sprite = cg_new_sprite (window, "test/sprite.png");
 
 	cg_instance* instance = cg_new_instance (sprite);
 

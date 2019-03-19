@@ -1,7 +1,7 @@
 // libcgame: A simple, abstracted rendering library for C games, based on SDL.
 // Copyright (C) 2019 Ethan McTague
 // 
-#include "libcgame.h"
+#include "cgmem.h"
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
 
