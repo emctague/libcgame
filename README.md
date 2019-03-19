@@ -8,7 +8,37 @@ of objects, and keeping track of items to render internally.
 This library IS NOT intended for complex, professional game engines and games. It is intended
 only to simplify the process of creating smaller projects.
 
-For an example, see `test/test.c`.
+
+## Example
+
+```c
+#include <libcgame.h>
+
+int
+main (int argc, char** argv)
+{
+	cg_init ();
+
+	cg_window* window = cg_new_window ("Hello, World", 1024, 768);
+
+	// A drawable image
+	cg_sprite* sprite = cg_new_sprite (window, "pixel_art.png");
+
+	// An actual visible instance of a sprite you can see onscreen
+	cg_instance* instance = cg_new_instance (sprite);
+
+	// Main game loop
+	while (cg_update (window)) {
+
+		// Keyboard movement
+		if (cg_get_key(window, CG_KEY_RIGHT)) instance->x++;
+		if (cg_get_key(window, CG_KEY_LEFT)) instance->x--;
+	}
+
+	return 0;
+}
+```
+
 
 ## Building and Installing
 
