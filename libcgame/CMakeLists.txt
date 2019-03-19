@@ -18,7 +18,7 @@ target_compile_options(cgame PUBLIC ${SDL2_CFLAGS_OTHER})
 set_target_properties(cgame PROPERTIES 
 	VERSION ${PROJECT_VERSION}
 	SOVERSION 1
-	PUBLIC_HEADER libcgame.h)
+	PUBLIC_HEADER include/libcgame.h)
 
 configure_file(cgame.pc.in cgame.pc @ONLY)
 
