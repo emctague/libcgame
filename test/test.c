@@ -1,6 +1,7 @@
 #include <libcgame.h>
 #include <assert.h>
 
+extern void cg_data_test();
 
 int
 main (int argc, char** argv)

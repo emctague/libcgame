@@ -151,6 +151,8 @@ cg_quit ()
 		cg_destroy_window ((cg_window*) cg_windows.items[i]);
 	}
 
+	cg_destroy_mem_list (&cg_windows);
+
 	SDL_Quit ();
 }
 

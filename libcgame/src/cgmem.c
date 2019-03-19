@@ -2,7 +2,6 @@
 #include "cgmem.h"
 #include <malloc.h>
 
-
 void
 cg_new_mem_list (cg_mem_list* list, int itemsize)
 {
